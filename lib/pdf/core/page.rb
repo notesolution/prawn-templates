@@ -65,9 +65,9 @@ module PDF
       def dimensions
         if imported_page?
           media_box = inherited_dictionary_value(:MediaBox)
-          return media_box.data if media_box.is_a?(PDF::Core::Reference)
+          return media_box.data if media_box.is_a?(PDF::Core::Reference) && media_box&.data.present?
 
-          return media_box
+          return media_box if media_box.present?
         end
 
         coords = PDF::Core::PageGeometry::SIZES[size] || size
@@ -88,6 +88,8 @@ module PDF
       end
       def init_from_object(options)
         @dictionary = options[:object_id].to_i
+        @size = options[:size] || 'LETTER'
+        @layout = options[:layout] || :portrait
         if options[:page_template]
           dictionary.data[:Parent] = document.state.store.pages
         end
